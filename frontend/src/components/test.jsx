@@ -10,7 +10,7 @@ export default function Test(){
     const [error,setError] = useState("")
     const navigate = useNavigate()
 
-    const handleSignup =async (e)=>{
+    const handleSignup =async(e)=>{
         e.preventDefault()
         setError("")
         try{
@@ -54,7 +54,7 @@ export default function Test(){
                  required
                   />
 
-                  <input type="text"
+                  <input type="password"
                   className="w-full border rounded shadow p-2"
                   placeholder="Password"
                   onChange={e=>setPassword(e.target.value)}

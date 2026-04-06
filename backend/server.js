@@ -4,7 +4,7 @@ const express = require("express"); // To create the API server
 const mysql = require("mysql2"); // To talk to our database
 const jwt = require("jsonwebtoken"); // To create security tokens
 const bcrypt = require("bcryptjs"); // To hash (hide) passwords
-const cors = require("cors"); // To allow React to talk to this server
+const cors = require("cors"); 
 
 const app = express(); // Initialize the express app
 app.use(express.json()); // Tell the server to read JSON data from the body

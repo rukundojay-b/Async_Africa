@@ -1,0 +1,12 @@
+Parking research:Campany Name:CIS
+Name Of Agent:Nshimiye imana emanuel
+Process:Umutekano 
+15 :service
+1-24:2000frw
+24_over 4000:
+minmum:2000
+Misc:prayer
+LOCATION:KICUKIRO NIBOYI 
+
+
+

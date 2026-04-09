@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CropGuard AI · Gemini 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:    #0d1a0d; --bg3: #172017; --card: #1b2a1b;
+  --b1:    rgba(122,191,58,.14); --b2: rgba(122,191,58,.32);
+  --lime:  #7abf3a; --lime2: #8fd642;
+  --blue:  #4a9eff; --amber: #e8a020; --red: #e05c4a;
+  --text:  #cfe3b8; --t2: #85a66a; --t3: #4d6b38; --white: #eaf4d8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-30%;left:50%;transform:translateX(-50%);width:800px;height:500px;background:radial-gradient(ellipse,rgba(122,191,58,.055) 0%,transparent 70%);pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1}
+
+/* header */
+header{display:flex;align-items:center;gap:12px;padding:1.2rem 2rem;border-bottom:1px solid var(--b1);background:rgba(13,26,13,.92);backdrop-filter:blur(14px);position:sticky;top:0;z-index:100}
+.logo{width:36px;height:36px;border-radius:9px;background:var(--lime);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--white);letter-spacing:-.4px}
+.logo-sub{font-size:.68rem;color:var(--t3);letter-spacing:.8px;text-transform:uppercase}
+.hbadge{margin-left:auto;display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:500;background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.22);color:var(--blue)}
+.hbadge-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* layout */
+main{max-width:780px;margin:0 auto;padding:2.8rem 1.5rem 5rem}
+.hero{text-align:center;margin-bottom:2.5rem}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5.5vw,2.9rem);font-weight:800;color:var(--white);letter-spacing:-1.3px;line-height:1.08;margin-bottom:.8rem}
+.hero h1 em{font-style:normal;color:var(--lime)}
+.hero p{font-size:.95rem;color:var(--t2);font-weight:300;line-height:1.7;max-width:400px;margin:0 auto}
+
+/* card */
+.card{background:var(--card);border:1px solid var(--b1);border-radius:18px;padding:1.75rem;margin-bottom:1.25rem}
+
+/* upload zone */
+#file-input{position:absolute;left:-9999px;opacity:0;width:1px;height:1px}
+.uzone{border:1.5px dashed var(--b2);border-radius:12px;padding:2.8rem 2rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:rgba(122,191,58,.04);user-select:none}
+.uzone:hover,.uzone.over{border-color:var(--lime);background:rgba(122,191,58,.09)}
+.uzone.over{border-style:solid}
+.u-icon{font-size:2.4rem;margin-bottom:.6rem;display:block}
+.u-main{font-family:'Syne',sans-serif;font-size:.96rem;font-weight:700;color:var(--white);margin-bottom:.25rem}
+.u-sub{font-size:.78rem;color:var(--t3)}
+
+#prev-wrap{display:none;margin-top:1.2rem;position:relative}
+#prev-img{width:100%;max-height:280px;object-fit:cover;border-radius:10px;border:1px solid var(--b1);display:block}
+.img-info{font-size:.72rem;color:var(--t3);margin-top:5px;text-align:right}
+.rm-btn{position:absolute;top:9px;right:9px;background:rgba(0,0,0,.7);color:#fff;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center}
+.rm-btn:hover{background:rgba(224,92,74,.9)}
+
+/* key row */
+.key-row{display:flex;gap:10px;margin-top:1.4rem;align-items:flex-end;flex-wrap:wrap}
+.key-wrap{flex:1;min-width:200px}
+.key-label{font-size:.7rem;font-weight:500;text-transform:uppercase;letter-spacing:.6px;color:var(--blue);margin-bottom:6px;display:block}
+.key-field{position:relative}
+.key-input{width:100%;padding:.65rem 2.8rem .65rem .9rem;background:var(--bg3);border:1px solid var(--b1);border-radius:9px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s,box-shadow .2s;letter-spacing:.5px}
+.key-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(74,158,255,.1)}
+.key-toggle{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:.95rem;padding:2px;color:var(--t3);line-height:1}
+.key-hint{font-size:.7rem;color:var(--t3);margin-top:5px;line-height:1.4}
+.key-hint a{color:var(--lime);text-decoration:none}
+.key-hint a:hover{text-decoration:underline}
+
+/* go button */
+.go-btn{padding:.7rem 1.7rem;background:var(--lime);color:#0c1a0c;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s;white-space:nowrap;flex-shrink:0;align-self:flex-end}
+.go-btn:hover:not(:disabled){background:var(--lime2);transform:translateY(-1px);box-shadow:0 5px 18px rgba(122,191,58,.25)}
+.go-btn:disabled{opacity:.28;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* loading */
+#loading{display:none;text-align:center;padding:3.5rem 2rem;background:var(--card);border:1px solid var(--b1);border-radius:18px;margin-bottom:1.25rem}
+.ring{width:52px;height:52px;margin:0 auto 1.4rem;border:2.5px solid rgba(122,191,58,.18);border-top-color:var(--lime);border-radius:50%;animation:spin .85s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ld-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--white);margin-bottom:.3rem}
+.ld-sub{font-size:.83rem;color:var(--t3)}
+.ld-steps{display:flex;justify-content:center;gap:1.5rem;margin-top:1.5rem;flex-wrap:wrap}
+.lst{display:flex;align-items:center;gap:6px;font-size:.77rem;color:var(--t3);transition:color .3s}
+.lst-dot{width:8px;height:8px;border-radius:50%;background:var(--t3);transition:background .3s;flex-shrink:0}
+.lst.active{color:var(--lime)}.lst.active .lst-dot{background:var(--lime);animation:blink .7s ease-in-out infinite}
+.lst.done{color:var(--t2)}.lst.done .lst-dot{background:var(--lime)}
+
+/* error */
+#error-box{display:none;border-radius:12px;padding:1.2rem 1.5rem;margin-bottom:1.25rem;font-size:.88rem;line-height:1.65}
+#error-box.net-err{background:rgba(232,160,32,.07);border:1px solid rgba(232,160,32,.22);color:var(--amber)}
+#error-box.api-err{background:rgba(224,92,74,.07);border:1px solid rgba(224,92,74,.22);color:var(--red)}
+.err-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:.5rem;display:block}
+.err-steps{margin:.6rem 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.35rem}
+.err-steps li{font-size:.82rem;color:var(--t2);display:flex;gap:7px}
+.err-steps li::before{content:'→';color:var(--lime);font-weight:700;flex-shrink:0}
+.err-steps a{color:var(--lime);text-decoration:none}
+
+/* model badge */
+.model-badge{display:inline-block;background:rgba(122,191,58,.12);padding:2px 8px;border-radius:12px;font-size:.65rem;font-weight:500;color:var(--lime);margin-left:8px;vertical-align:middle}
+
+/* debug panel */
+#debug-panel{display:none;background:var(--bg3);border:1px solid var(--b1);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;font-family:monospace;font-size:.75rem;color:var(--t2);line-height:1.7}
+#debug-panel .dbg-title{font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:.5rem}
+.dbg-ok{color:var(--lime)}.dbg-err{color:var(--red)}.dbg-warn{color:var(--amber)}
+
+/* results */
+#results{display:none;animation:fadeUp .45s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.d-header{background:var(--card);border:1px solid var(--b1);border-radius:18px;padding:1.6rem 1.75rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
+.d-emoji{font-size:2.5rem;flex-shrink:0}
+.d-info{flex:1;min-width:150px}
+.d-name{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;color:var(--white);letter-spacing:-.5px;line-height:1.1;margin-bottom:4px}
+.d-sci{font-size:.82rem;color:var(--t3);font-style:italic}
+.d-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex-shrink:0}
+.conf-block{text-align:right}
+.conf-lbl{font-size:.67rem;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.conf-val{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;color:var(--lime);line-height:1;margin-bottom:5px}
+.conf-bar{width:90px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-left:auto}
+.conf-fill{height:100%;border-radius:2px;width:0%;transition:width 1.1s ease}
+.sev-pill{padding:5px 14px;border-radius:20px;font-family:'Syne',sans-serif;font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.sev-none,.sev-low{background:rgba(122,191,58,.14);color:var(--lime);border:1px solid rgba(122,191,58,.28)}
+.sev-medium{background:rgba(232,160,32,.13);color:var(--amber);border:1px solid rgba(232,160,32,.28)}
+.sev-high{background:rgba(224,92,74,.11);color:var(--red);border:1px solid rgba(224,92,74,.25)}
+
+.qrow{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.2rem}
+@media(max-width:540px){.qrow{grid-template-columns:1fr}}
+.qcard{background:var(--card);border:1px solid var(--b1);border-radius:14px;padding:1.1rem}
+.qcard-icon{font-size:1.35rem;margin-bottom:.45rem}
+.qcard-lbl{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:.3rem}
+.qcard-val{font-size:.88rem;color:var(--text);line-height:1.45}
+.cr{color:var(--red)}.ca{color:var(--amber)}.cl{color:var(--lime)}
+
+.det{background:var(--card);border:1px solid var(--b1);border-radius:14px;padding:1.35rem;margin-bottom:1.2rem}
+.det h3{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:var(--white);margin-bottom:.75rem;display:flex;align-items:center;gap:7px}
+.det p{font-size:.9rem;color:var(--t2);line-height:1.72;font-weight:300}
+.det-list{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+.det-list li{display:flex;gap:9px;font-size:.88rem;color:var(--t2);line-height:1.5;font-weight:300;align-items:flex-start}
+.num{flex-shrink:0;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.67rem;font-weight:700;font-family:'Syne',sans-serif;margin-top:2px}
+.nl{background:rgba(122,191,58,.14);color:var(--lime)}
+.na{background:rgba(232,160,32,.14);color:var(--amber)}
+.nb{background:rgba(74,158,255,.14);color:var(--blue)}
+
+.ai-note{padding:.9rem 1.1rem;background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.15);border-radius:10px;font-size:.82rem;color:var(--t2);line-height:1.55;margin-bottom:1.2rem}
+.ai-note strong{color:var(--blue);font-weight:500}
+
+.reset-btn{display:inline-flex;align-items:center;gap:6px;padding:.58rem 1.4rem;border:1.5px solid var(--b2);border-radius:10px;background:transparent;color:var(--t2);font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s}
+.reset-btn:hover{border-color:var(--lime);color:var(--lime)}
+
+footer{text-align:center;padding:1.75rem;font-size:.75rem;color:var(--t3);border-top:1px solid var(--b1);margin-top:4rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,image/gif">
+
+<header>
+  <div class="logo">🌿</div>
+  <div>
+    <div class="logo-text">CropGuard AI</div>
+    <div class="logo-sub">Disease Detection</div>
+  </div>
+  <div class="hbadge"><span class="hbadge-dot"></span>Gemini 2.0 · Multi-Model</div>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Detect. Protect.<br><em>Treat.</em></h1>
+    <p>Upload a photo of your crop. AI will identify any disease and give you a full treatment plan instantly.</p>
+  </div>
+
+  <div class="card" id="upload-card">
+    <div class="uzone" id="uzone">
+      <span class="u-icon">🌾</span>
+      <div class="u-main">Drop a crop photo here</div>
+      <div class="u-sub">or click to browse · JPG · PNG · WEBP</div>
+    </div>
+
+    <div id="prev-wrap">
+      <img id="prev-img" alt="Preview">
+      <button class="rm-btn" id="rm-btn">✕</button>
+      <div class="img-info" id="img-info"></div>
+    </div>
+
+    <div class="key-row">
+      <div class="key-wrap">
+        <label class="key-label" for="api-key">✨ Gemini API Key</label>
+        <div class="key-field">
+          <input class="key-input" type="text" id="api-key"
+            placeholder="Paste your Gemini key here (AIzaSy...)"
+            autocomplete="off" spellcheck="false">
+          <button class="key-toggle" id="key-toggle" title="Show / hide key">👁</button>
+        </div>
+        <div class="key-hint">
+          Free key → <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>
+          → Sign in → Get API key (Gemini 2.0 enabled)
+        </div>
+      </div>
+      <button class="go-btn" id="go-btn" disabled>🔬 Analyze</button>
+    </div>
+  </div>
+
+  <div id="debug-panel">
+    <div class="dbg-title">🔧 Debug info</div>
+    <div id="debug-log"></div>
+  </div>
+
+  <div id="error-box" role="alert"></div>
+
+  <div id="loading">
+    <div class="ring"></div>
+    <div class="ld-title">Analyzing your crop…</div>
+    <div class="ld-sub" id="model-status">Connecting to Gemini 2.0</div>
+    <div class="ld-steps">
+      <div class="lst" id="ls0"><span class="lst-dot"></span>Compressing image</div>
+      <div class="lst" id="ls1"><span class="lst-dot"></span>Contacting AI models</div>
+      <div class="lst" id="ls2"><span class="lst-dot"></span>Building treatment plan</div>
+    </div>
+  </div>
+
+  <div id="results">
+    <div class="d-header">
+      <div class="d-emoji">🦠</div>
+      <div class="d-info">
+        <div class="d-name" id="r-name">—</div>
+        <div class="d-sci" id="r-sci"></div>
+      </div>
+      <div class="d-right">
+        <div class="conf-block">
+          <div class="conf-lbl">Confidence</div>
+          <div class="conf-val" id="r-conf">—</div>
+          <div class="conf-bar"><div class="conf-fill" id="r-fill"></div></div>
+        </div>
+        <span class="sev-pill" id="r-sev">—</span>
+      </div>
+    </div>
+
+    <div class="qrow">
+      <div class="qcard"><div class="qcard-icon">🦠</div><div class="qcard-lbl cr">Cause</div><div class="qcard-val" id="r-cause">—</div></div>
+      <div class="qcard"><div class="qcard-icon">📡</div><div class="qcard-lbl ca">Spread risk</div><div class="qcard-val" id="r-spread">—</div></div>
+      <div class="qcard"><div class="qcard-icon">⚡</div><div class="qcard-lbl cl">Do this now</div><div class="qcard-val" id="r-now">—</div></div>
+    </div>
+
+    <div class="det"><h3>🔎 About This Disease</h3><p id="r-about">—</p></div>
+    <div class="det"><h3>🛡️ Protect Surrounding Crops</h3><ul class="det-list" id="r-protect"></ul></div>
+    <div class="det"><h3>💊 Treatment Plan</h3><ul class="det-list" id="r-treat"></ul></div>
+    <div class="det"><h3>🌿 Organic / Low-Cost Alternatives</h3><ul class="det-list" id="r-organic"></ul></div>
+
+    <div class="ai-note" id="r-ainote"><strong>AI note:</strong> —</div>
+    <button class="reset-btn" id="reset-btn">← Analyze Another Crop</button>
+  </div>
+</main>
+
+<footer>CropGuard AI · Powered by Google Gemini 2.0 (multi-model fallback) · Built to help farmers detect crop diseases early</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // DOM refs
+  const fileInput  = document.getElementById('file-input');
+  const uzone      = document.getElementById('uzone');
+  const prevWrap   = document.getElementById('prev-wrap');
+  const prevImg    = document.getElementById('prev-img');
+  const imgInfo    = document.getElementById('img-info');
+  const rmBtn      = document.getElementById('rm-btn');
+  const apiKeyEl   = document.getElementById('api-key');
+  const keyToggle  = document.getElementById('key-toggle');
+  const goBtn      = document.getElementById('go-btn');
+  const resetBtn   = document.getElementById('reset-btn');
+  const modelStatus = document.getElementById('model-status');
+
+  // State
+  let imgB64  = null;
+  let imgMime = 'image/jpeg';
+  let stepTmr = null;
+  let lastUsedModel = '';
+
+  // ── Key show/hide ─────────────────────────────────────────────
+  let keyVisible = true;
+  keyToggle.addEventListener('click', () => {
+    keyVisible = !keyVisible;
+    apiKeyEl.style.letterSpacing = keyVisible ? '.5px' : '3px';
+    apiKeyEl.style.color = keyVisible ? 'var(--white)' : 'var(--t3)';
+    if (!keyVisible) {
+      apiKeyEl.dataset.real = apiKeyEl.value;
+      apiKeyEl.value = '•'.repeat(apiKeyEl.value.length);
+      apiKeyEl.readOnly = true;
+    } else {
+      apiKeyEl.value = apiKeyEl.dataset.real || apiKeyEl.value;
+      apiKeyEl.readOnly = false;
+    }
+    keyToggle.textContent = keyVisible ? '👁' : '🙈';
+  });
+
+  // ── File handling ────────────────────────────────────────────
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) processFile(fileInput.files[0]);
+  });
+
+  uzone.addEventListener('click', () => {
+    if (keyVisible) { fileInput.value = ''; fileInput.click(); }
+  });
+
+  ['dragover','drop'].forEach(ev =>
+    document.addEventListener(ev, e => e.preventDefault())
+  );
+
+  uzone.addEventListener('dragenter', e => { e.preventDefault(); uzone.classList.add('over'); });
+  uzone.addEventListener('dragover',  e => { e.preventDefault(); e.dataTransfer.dropEffect='copy'; uzone.classList.add('over'); });
+  uzone.addEventListener('dragleave', e => { if(!uzone.contains(e.relatedTarget)) uzone.classList.remove('over'); });
+  uzone.addEventListener('drop', e => {
+    e.preventDefault();
+    uzone.classList.remove('over');
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) processFile(f);
+    else if (f) showError('api-err', 'Please drop an image file (JPG, PNG, or WEBP).', []);
+  });
+
+  rmBtn.addEventListener('click', () => {
+    imgB64 = null; fileInput.value = '';
+    prevImg.src = ''; prevWrap.style.display = 'none';
+    uzone.style.display = 'block'; updateBtn();
+  });
+
+  apiKeyEl.addEventListener('input', updateBtn);
+  goBtn.addEventListener('click', runAnalysis);
+  resetBtn.addEventListener('click', resetAll);
+
+  // ── Image processing ─────────────────────────────────────────
+  function processFile(file) {
+    imgMime = file.type || 'image/jpeg';
+    const reader = new FileReader();
+    reader.onerror = () => showError('api-err', 'Could not read image file.', []);
+    reader.onload = e => {
+      const original = e.target.result;
+      compressImage(original, imgMime, 900, 0.82).then(result => {
+        imgB64 = result.b64;
+        prevImg.src = 'data:image/jpeg;base64,' + imgB64;
+        imgInfo.textContent = `Image ready · ${result.w}×${result.h}px · ${Math.round(imgB64.length * 0.75 / 1024)}KB`;
+        uzone.style.display  = 'none';
+        prevWrap.style.display = 'block';
+        hideError(); updateBtn();
+      }).catch(err => showError('api-err', 'Image processing failed: ' + err.message, []));
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function compressImage(dataUrl, mime, maxPx, quality) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.onload = () => {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if (w === 0 || h === 0) { reject(new Error('Image has zero dimensions')); return; }
+        if (w > maxPx || h > maxPx) {
+          if (w >= h) { h = Math.round(h * maxPx / w); w = maxPx; }
+          else        { w = Math.round(w * maxPx / h); h = maxPx; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const out = canvas.toDataURL('image/jpeg', quality);
+        const b64 = out.split(',')[1];
+        if (!b64) { reject(new Error('Canvas export failed')); return; }
+        resolve({ b64, w, h });
+      };
+      img.src = dataUrl;
+    });
+  }
+
+  function updateBtn() {
+    const key = keyVisible ? apiKeyEl.value.trim() : (apiKeyEl.dataset.real || '').trim();
+    goBtn.disabled = !(imgB64 && key.length > 10);
+  }
+
+  // ── Step animation ───────────────────────────────────────────
+  function startSteps() {
+    ['ls0','ls1','ls2'].forEach(id => document.getElementById(id).className = 'lst');
+    document.getElementById('ls0').classList.add('active');
+    let i = 0;
+    stepTmr = setInterval(() => {
+      document.getElementById(['ls0','ls1','ls2'][i]).className = 'lst done';
+      i++;
+      if (i < 3) document.getElementById(['ls0','ls1','ls2'][i]).classList.add('active');
+      else clearInterval(stepTmr);
+    }, 1800);
+  }
+  function stopSteps() { clearInterval(stepTmr); }
+
+  // ── Debug log ────────────────────────────────────────────────
+  const debugLines = [];
+  function dbg(msg, type) {
+    debugLines.push(`<span class="dbg-${type||''}">${esc(msg)}</span>`);
+    document.getElementById('debug-log').innerHTML = debugLines.join('<br>');
+  }
+  function showDebug() { document.getElementById('debug-panel').style.display = 'block'; }
+  function hideDebug() { document.getElementById('debug-panel').style.display = 'none'; debugLines.length = 0; }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🔥 UPDATED GEMINI CALL WITH MODEL FALLBACK + 503 HANDLING
+  // ═══════════════════════════════════════════════════════════════
+  
+  async function callGeminiWithFallback(imageBase64, promptText) {
+    const apiKey = keyVisible ? apiKeyEl.value.trim() : (apiKeyEl.dataset.real || '').trim();
+    
+    // ✅ CORRECT MODEL LIST (Gemini 2.x only)
+    const models = [
+      "gemini-2.0-flash",
+      "gemini-2.5-flash",
+      "gemini-2.0-flash-lite",
+      "gemini-2.5-flash-lite"
+    ];
+    
+    let lastError = null;
+    
+    for (let i = 0; i < models.length; i++) {
+      const model = models[i];
+      modelStatus.textContent = `Trying ${model}...`;
+      dbg(`🔄 Trying model: ${model}`, 'ok');
+      
+      const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+      
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { inline_data: { mime_type: "image/jpeg", data: imageBase64 } },
+                { text: promptText }
+              ]
+            }],
+            generationConfig: {
+              temperature: 0.2,
+              topP: 0.9,
+              maxOutputTokens: 1500
+            }
+          })
+        });
+        
+        dbg(`📡 Response status: ${response.status}`, response.ok ? 'ok' : 'warn');
+        
+        // 🔁 Handle 503 (Service Unavailable / Overloaded)
+        if (response.status === 503) {
+          dbg(`⚠️ Model ${model} overloaded (503), trying next...`, 'warn');
+          lastError = new Error(`503: ${model} temporarily unavailable`);
+          continue;
+        }
+        
+        if (!response.ok) {
+          let errDetail = '';
+          try {
+            const errData = await response.json();
+            errDetail = errData?.error?.message || '';
+          } catch(e) {}
+          dbg(`❌ API Error ${response.status}: ${errDetail}`, 'err');
+          
+          if (response.status === 404) {
+            dbg(`Model ${model} not found, trying next...`, 'warn');
+            continue;
+          }
+          if (response.status === 429) {
+            throw new Error(`Rate limit exceeded. Please wait 30 seconds.`);
+          }
+          if (response.status === 403) {
+            throw new Error(`API key invalid or not authorized for Gemini 2.0. Generate a new key at aistudio.google.com`);
+          }
+          continue;
+        }
+        
+        const data = await response.json();
+        dbg(`✅ Response received from ${model}`, 'ok');
+        
+        const result = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (!result) {
+          const finishReason = data?.candidates?.[0]?.finishReason || 'unknown';
+          dbg(`Empty response, finishReason: ${finishReason}`, 'warn');
+          if (finishReason === 'SAFETY') {
+            throw new Error('Image blocked by safety filters. Try a different photo.');
+          }
+          continue;
+        }
+        
+        // Success!
+        lastUsedModel = model;
+        modelStatus.textContent = `✓ Using ${model}`;
+        return result;
+        
+      } catch (err) {
+        dbg(`❌ Error with ${model}: ${err.message}`, 'err');
+        lastError = err;
+      }
+    }
+    
+    throw lastError || new Error('All Gemini models failed. Check your API key and internet connection.');
+  }
+
+  // ── Prompt construction ──────────────────────────────────────
+  const analysisPrompt = `You are an expert agricultural pathologist helping smallholder farmers.
+
+Examine this crop image carefully and diagnose any plant disease.
+
+Respond with ONLY a valid JSON object — no markdown, no code fences, nothing outside the JSON:
+
+{
+  "disease_name": "Common name, or 'Healthy — No Disease Detected' if plant is healthy",
+  "scientific_name": "Scientific name or empty string",
+  "severity": "none | low | medium | high",
+  "confidence": 85,
+  "cause": "One sentence: what causes this disease",
+  "spread_risk": "One sentence: how easily it spreads to nearby plants",
+  "urgent_action": "The single most important thing to do right now",
+  "about": "2-3 simple sentences about the disease and its symptoms",
+  "protection": ["Protect nearby crops step 1","Step 2","Step 3"],
+  "treatment": ["Treatment step 1","Step 2","Step 3","Step 4"],
+  "organic_alternatives": ["Low-cost option 1","Option 2","Option 3"],
+  "ai_note": "One honest sentence about confidence level"
+}
+
+- confidence = integer 0-100 (no quotes, no percent sign)
+- severity = "none" if plant is healthy
+- Use simple language a farmer can understand`;
+
+  // ── Main analysis ────────────────────────────────────────────
+  async function runAnalysis() {
+    const key = keyVisible ? apiKeyEl.value.trim() : (apiKeyEl.dataset.real || '').trim();
+    if (!key || !imgB64) return;
+
+    hideError(); hideDebug();
+    document.getElementById('upload-card').style.display = 'none';
+    document.getElementById('results').style.display     = 'none';
+    document.getElementById('loading').style.display     = 'block';
+    startSteps();
+
+    const kb = Math.round(imgB64.length * 0.75 / 1024);
+    dbg(`Image size: ${kb} KB (after compression)`, 'ok');
+    dbg(`Key starts with: ${key.substring(0, 8)}...`, 'ok');
+
+    try {
+      const rawResponse = await callGeminiWithFallback(imgB64, analysisPrompt);
+      dbg(`Raw response length: ${rawResponse.length} chars`, 'ok');
+
+      // Parse JSON
+      let parsed;
+      const cleaned = rawResponse.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/g, '').trim();
+      
+      try {
+        parsed = JSON.parse(cleaned);
+      } catch(e) {
+        const m = cleaned.match(/\{[\s\S]*\}/);
+        if (m) {
+          try { parsed = JSON.parse(m[0]); }
+          catch(e2) { 
+            dbg('JSON parse failed: ' + e2.message, 'err');
+            showDebug();
+            throw new Error('Response was not valid JSON. Please try again.');
+          }
+        } else {
+          dbg('No JSON object found', 'err');
+          showDebug();
+          throw new Error('Unexpected response format. Please try again.');
+        }
+      }
+
+      if (!parsed.disease_name) {
+        dbg('Missing disease_name field', 'warn');
+        showDebug();
+        throw new Error('Incomplete response from AI.');
+      }
+
+      dbg(`✅ Analysis complete using ${lastUsedModel || 'Gemini'}`, 'ok');
+      stopSteps();
+      document.getElementById('loading').style.display = 'none';
+      renderResults(parsed);
+
+    } catch (err) {
+      stopSteps();
+      document.getElementById('loading').style.display    = 'none';
+      document.getElementById('upload-card').style.display = 'block';
+
+      if (err.message.includes('503') || err.message.includes('overload')) {
+        showError('net-err',
+          'Gemini models are temporarily overloaded (503)',
+          [
+            'This happens during peak usage — please wait 30-60 seconds',
+            'Click "Analyze" again — the system will automatically try different models',
+            'If the problem persists, generate a fresh API key at aistudio.google.com'
+          ]
+        );
+      } else if (err.message.includes('fetch') || err.message.includes('network')) {
+        showError('net-err',
+          'Network error — cannot reach Gemini API',
+          [
+            'Check your internet connection',
+            'Disable VPN, proxy, or firewall temporarily',
+            'Try a different browser (Chrome works best)'
+          ]
+        );
+      } else {
+        showError('api-err', err.message, [
+          'Verify your API key is correct (starts with AIza...)',
+          'Go to aistudio.google.com → Create a new API key',
+          'Make sure Gemini API is enabled in your Google Cloud project'
+        ]);
+      }
+    }
+  }
+
+  // ── Render results ────────────────────────────────────────────
+  function renderResults(d) {
+    const healthy = d.severity === 'none' || (d.disease_name||'').toLowerCase().includes('healthy');
+
+    document.getElementById('r-name').textContent   = d.disease_name || 'Unknown';
+    document.getElementById('r-sci').textContent    = d.scientific_name ? `(${d.scientific_name})` : '';
+    document.getElementById('r-cause').textContent   = d.cause         || '—';
+    document.getElementById('r-spread').textContent  = healthy ? 'No spread risk' : (d.spread_risk || '—');
+    document.getElementById('r-now').textContent     = d.urgent_action || '—';
+    document.getElementById('r-about').textContent   = d.about         || '—';
+
+    const conf = Math.min(100, Math.max(0, parseInt(d.confidence, 10) || 0));
+    document.getElementById('r-conf').textContent = conf + '%';
+    const fill = document.getElementById('r-fill');
+    fill.style.background = conf >= 75 ? 'var(--lime)' : conf >= 50 ? 'var(--amber)' : 'var(--red)';
+    setTimeout(() => { fill.style.width = conf + '%'; }, 60);
+
+    const sev   = healthy ? 'none' : (d.severity || 'medium').toLowerCase();
+    const sevEl = document.getElementById('r-sev');
+    const labels = { none:'No Disease', low:'Low Severity', medium:'Medium Severity', high:'High Severity' };
+    sevEl.textContent = labels[sev] || 'Unknown';
+    sevEl.className   = 'sev-pill sev-' + (labels[sev] ? sev : 'medium');
+
+    buildList('r-protect', d.protection           || [], 'na');
+    buildList('r-treat',   d.treatment            || [], 'nl');
+    buildList('r-organic', d.organic_alternatives || [], 'nb');
+
+    const modelNote = lastUsedModel ? ` (using ${lastUsedModel})` : '';
+    document.getElementById('r-ainote').innerHTML =
+      `<strong>AI note:</strong> ${esc(d.ai_note || 'No additional notes.')}${modelNote}`;
+
+    document.getElementById('results').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function buildList(id, items, numCls) {
+    const ul = document.getElementById(id);
+    ul.innerHTML = '';
+    const arr = Array.isArray(items) ? items : [];
+    if (!arr.length) {
+      const li = document.createElement('li');
+      li.textContent = 'No steps provided.';
+      li.style.color = 'var(--t3)';
+      ul.appendChild(li);
+      return;
+    }
+    arr.forEach((txt, i) => {
+      const li = document.createElement('li');
+      const n  = document.createElement('span');
+      n.className = 'num ' + numCls;
+      n.textContent = i + 1;
+      li.appendChild(n);
+      li.appendChild(document.createTextNode(String(txt)));
+      ul.appendChild(li);
+    });
+  }
+
+  function showError(cls, title, steps) {
+    const box = document.getElementById('error-box');
+    box.className = 'card ' + cls;
+    box.style.display = 'block';
+    let html = `<span class="err-title">⚠️ ${esc(title)}</span>`;
+    if (steps.length) {
+      html += '<ul class="err-steps">' + steps.map(s => `<li>${s}</li>`).join('') + '</ul>';
+    }
+    box.innerHTML = html;
+  }
+
+  function hideError() {
+    const box = document.getElementById('error-box');
+    box.style.display = 'none';
+    box.innerHTML = '';
+  }
+
+  function resetAll() {
+    imgB64 = null; stopSteps();
+    fileInput.value = ''; prevImg.src = '';
+    prevWrap.style.display  = 'none';
+    uzone.style.display     = 'block';
+    goBtn.disabled = true;
+    document.getElementById('upload-card').style.display = 'block';
+    document.getElementById('results').style.display     = 'none';
+    document.getElementById('loading').style.display     = 'none';
+    hideError(); hideDebug();
+    modelStatus.textContent = 'Connecting to Gemini 2.0';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+});
+</script>
+</body>
+</html>

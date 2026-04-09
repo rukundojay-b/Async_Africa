@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 // // LINE 1: Import React and useState (to store what user types)
 // import React, { useState } from 'react'; 
@@ -143,16 +144,14 @@
 
 
 // LINE 1: Import React and useState (to store what user types)
+=======
+>>>>>>> c46d2f09f7d9d80766c965363450bbda596a55fe
 import React, { useState } from 'react'; 
-
-// LINE 2: Import axios to talk to our Node.js server
 import axios from 'axios'; 
-
-// LINE 3: Import useNavigate to move between pages
 import { useNavigate } from 'react-router-dom'; 
 
-// LINE 4: Main Signup component
 function Signup() {
+<<<<<<< HEAD
   
   // LINE 5: State to store inputs
   const [name, setName] = useState(''); 
@@ -169,8 +168,19 @@ function Signup() {
   const handleSignup = async (e) => {
     
     // LINE 9: Stop the browser from refreshing the whole page
+=======
+  const [name, setName] = useState(''); 
+  const [email, setEmail] = useState(''); 
+  const [password, setPassword] = useState(''); 
+  const [error, setError] = useState('');
+  const navigate = useNavigate(); 
+
+  const handleSignup = async (e) => {
+>>>>>>> c46d2f09f7d9d80766c965363450bbda596a55fe
     e.preventDefault(); 
+    setError(''); // Reset error UI
     
+<<<<<<< HEAD
     // LINE 10: Clear any old error messages
     setError('');
     
@@ -178,19 +188,26 @@ function Signup() {
     try {
       
       // LINE 12: Send the name, email, and password to our backend
+=======
+    try {
+>>>>>>> c46d2f09f7d9d80766c965363450bbda596a55fe
       const res = await axios.post("http://localhost:3000/signup", { 
-        name: name,
-        email: email, 
-        password: password 
+        name, email, password 
       });
 
+<<<<<<< HEAD
       // LINE 13: Check if server says "201" (Created Successfully)
       if (res.status === 201) { 
         // LINE 14: Redirect to login page
+=======
+      if (res.status === 201) { 
+        alert("Account Created!"); 
+>>>>>>> c46d2f09f7d9d80766c965363450bbda596a55fe
         navigate("/login"); 
       }
       
     } catch (err) {
+<<<<<<< HEAD
       
       // LINE 15: If server says "409", the email is already taken
       if (err.response?.status === 409) setError("Email already exists!"); 
@@ -257,10 +274,71 @@ function Signup() {
           Already have an account? Login
         </button>
         
+=======
+      // Logic to extract the exact error message from backend
+      if (err.response && err.response.data) {
+        setError(err.response.data.error || "An error occurred");
+      } else {
+        setError("Cannot connect to server. Is the backend running?");
+      }
+    }
+  };
+
+  return (
+    <div className="flex justify-center items-center h-screen bg-gray-50">
+      <div className="bg-white p-8 rounded-lg shadow-md w-96 border"> 
+        <h2 className="text-2xl font-bold text-center mb-6 text-green-600">Create Account</h2>
+
+        {error && (
+          <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm border border-red-200">
+            <strong>Error:</strong> {error}
+          </div>
+        )}
+        
+        <form onSubmit={handleSignup} className="space-y-4">
+          <input 
+            className="w-full border p-2 rounded focus:outline-green-500" 
+            placeholder="Full Name" 
+            onChange={e => setName(e.target.value)} 
+            required 
+          />
+          <input 
+            className="w-full border p-2 rounded focus:outline-green-500" 
+            type="email"
+            placeholder="Email Address" 
+            onChange={e => setEmail(e.target.value)} 
+            required 
+          />
+          <input 
+            className="w-full border p-2 rounded focus:outline-green-500" 
+            type="password" 
+            placeholder="Password" 
+            onChange={e => setPassword(e.target.value)} 
+            required 
+          />
+          <button className="w-full bg-green-500 text-white p-2 rounded font-bold hover:bg-green-600 transition">
+            Sign Up
+          </button>
+        </form>
+        
+        <button 
+          onClick={() => navigate("/login")} 
+          className="mt-4 text-gray-500 w-full text-xs hover:underline"
+        >
+          Already have an account? Login
+        </button>
+>>>>>>> c46d2f09f7d9d80766c965363450bbda596a55fe
       </div>
     </div>
   );
 }
 
+<<<<<<< HEAD
 // LINE 24: Export the component
 export default Signup;
+=======
+export default Signup;
+
+
+
+>>>>>>> c46d2f09f7d9d80766c965363450bbda596a55fe
